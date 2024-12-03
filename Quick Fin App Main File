@@ -1,0 +1,1745 @@
+package com.example.rssreader
+
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.rssreader.ui.theme.RSSReaderTheme
+
+
+
+import com.example.rssreader.R
+import kotlin.math.max
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        val features = listOf(
+            "Tip Calculator",
+            "Mortgage Calculator",
+            "Currency Converter",
+            "Discount Calculator",
+            "Savings Advisor",
+            "Investment Return Calculator"
+        )
+
+        setContent {
+            RSSReaderTheme {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize()
+                            .padding(vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Display logo at the top
+                        Image(
+                            painter = painterResource(id = R.drawable.icon), // Replace "icon" with the actual logo file name
+                            contentDescription = "App Logo",
+                            modifier = Modifier
+                                .size(200.dp)
+                                .padding(bottom = 1.dp)
+                        )
+
+                        // Display app title
+                        Text(
+                            text = "QuickFin",
+                            fontSize = 32.sp,
+                            color = Color.Green,
+                            fontFamily = FontFamily.Serif, // Use Serif font
+                            fontWeight = FontWeight.Bold, // Make it bold
+                            modifier = Modifier
+                                .padding(0.5.dp)
+                        )
+                        Text(
+                            text = "Your favorite financial tool", // New tagline
+                            fontSize = 30.sp,
+                            color = Color(0xFF006400),
+                            fontFamily = FontFamily.Cursive,
+                            modifier = Modifier.padding(top = 8.dp) // Adds spacing from the title
+                        )
+
+                        // Display features in a list
+                        LazyColumn(
+                            modifier = Modifier.weight(1f), // Allocate remaining vertical space
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            contentPadding = PaddingValues(horizontal = 0.5.dp)
+                        ) {
+                            items(features) { item ->
+                                ListItem(name = item) {
+                                    when (item) {
+                                        "Tip Calculator" -> startActivity(Intent(this@MainActivity, TipCalculatorActivity::class.java))
+                                        "Mortgage Calculator" -> startActivity(Intent(this@MainActivity, MortgageCalculatorActivity::class.java))
+                                        "Currency Converter" -> startActivity(Intent(this@MainActivity, CurrencyConverterActivity::class.java))
+                                        "Discount Calculator" -> startActivity(Intent(this@MainActivity, DiscountCalculatorActivity::class.java))
+                                        "Investment Return Calculator" -> startActivity(Intent(this@MainActivity, InvestmentReturnCalculatorActivity::class.java))
+                                        "Savings Advisor" -> startActivity(Intent(this@MainActivity, SavingsAdvisorActivity::class.java))
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add version info section at the bottom
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "QuickFin App v1.0",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = "Helping you achieve financial success.",
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ListItem(name: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        // Centering the text inside the card
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            contentAlignment = Alignment.Center // Center the text
+        ) {
+            Text(
+                text = name,
+                fontSize = 20.sp, // Change font size here
+                fontWeight = FontWeight.Bold, // Make the text bold (optional)
+                color = Color.Black // Set the color of the text
+            )
+        }
+    }
+}
+
+
+// Tip Calculator Activity
+@OptIn(ExperimentalMaterial3Api::class)
+class TipCalculatorActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            RSSReaderTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Tip Calculator") },
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) { // Go back to previous screen
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    TipCalculatorScreen(Modifier.padding(innerPadding))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TipCalculatorScreen(modifier: Modifier = Modifier) {
+    var billAmount by remember { mutableStateOf("") }
+    var tipAmount by remember { mutableStateOf(0.0) }
+    var totalAmount by remember { mutableStateOf(0.0) }
+    var customTipPercentage by remember { mutableStateOf("") }
+    var selectedTipPercentage by remember { mutableStateOf(0.0) }
+    var generosityMessage by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) { Text(
+        text = "Quick Tips Made Easy",
+        color = Color(0xFF006400),
+        fontFamily = FontFamily.Cursive,
+        fontSize = 30.sp,
+        modifier = Modifier.padding(top = 20.dp)
+    )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Input: Bill Amount
+            OutlinedTextField(
+                value = billAmount,
+                onValueChange = { input ->
+                    billAmount = input
+                    errorMessage = ""
+                    generosityMessage = ""
+                },
+                label = { Text("Enter Bill Amount") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = errorMessage.isNotEmpty()
+            )
+
+            // Display error message if any
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            // Title: Select a Tip Percentage
+            Text(
+                text = "Select a Tip Percentage",
+                fontSize = 20.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            // Tip Percentage Boxes
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // First Row: 15% and 18%
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TipBox(
+                        label = "15%",
+                        subLabel = "Good",
+                        percentage = 15,
+                        billAmount = billAmount,
+                        isSelected = selectedTipPercentage == 15.0,
+                        onTipSelected = { selectedTipPercentage = it }
+                    )
+                    TipBox(
+                        label = "18%",
+                        subLabel = "Great",
+                        percentage = 18,
+                        billAmount = billAmount,
+                        isSelected = selectedTipPercentage == 18.0,
+                        onTipSelected = { selectedTipPercentage = it }
+                    )
+                }
+
+                // Second Row: 20% and Custom
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    TipBox(
+                        label = "20%",
+                        subLabel = "Amazing",
+                        percentage = 20,
+                        billAmount = billAmount,
+                        isSelected = selectedTipPercentage == 20.0,
+                        onTipSelected = { selectedTipPercentage = it }
+                    )
+                    CustomTipBox(
+                        customTipPercentage = customTipPercentage,
+                        isSelected = selectedTipPercentage > 0.0 && selectedTipPercentage != 15.0 && selectedTipPercentage != 18.0 && selectedTipPercentage != 20.0,
+                        onValueChange = { customTipPercentage = it },
+                        onCustomTipSelected = { selectedTipPercentage = it }
+                    )
+                }
+            }
+
+            // Calculate Button
+            Button(
+                onClick = {
+                    val bill = billAmount.toDoubleOrNull()
+                    if (bill == null || bill <= 0) {
+                        errorMessage = "Please enter a valid positive bill amount."
+                        tipAmount = 0.0
+                        totalAmount = 0.0
+                        return@Button
+                    }
+                    val customTip = customTipPercentage.toDoubleOrNull()
+                    if (selectedTipPercentage == 0.0 && (customTip == null || customTip <= 0)) {
+                        errorMessage = "Please select a valid tip percentage."
+                        return@Button
+                    }
+                    errorMessage = ""
+                    tipAmount = bill * (selectedTipPercentage / 100)
+                    totalAmount = bill + tipAmount
+                    generosityMessage = if (selectedTipPercentage >= 20) {
+                        "Wow, you are being generous!"
+                    } else {
+                        ""
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50),
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Calculate")
+            }
+
+            // Generosity Message
+            if (generosityMessage.isNotEmpty()) {
+                Text(
+                    text = generosityMessage,
+                    color = Color.Green,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            // Results
+            if (tipAmount > 0 || totalAmount > 0) {
+                ResultsCard(tipAmount = tipAmount, totalAmount = totalAmount)
+            }
+        }
+
+        // App Logo at the Bottom
+        Image(
+            painter = painterResource(id = R.drawable.icon),
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 16.dp)
+        )
+    }
+}
+
+
+@Composable
+fun TipBox(
+    label: String,
+    subLabel: String,
+    percentage: Int,
+    billAmount: String,
+    isSelected: Boolean, // Highlight if true
+    onTipSelected: (Double) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .size(120.dp) // Larger box size
+            .clickable {
+                val bill = billAmount.toDoubleOrNull() ?: 0.0
+                onTipSelected(percentage.toDouble())
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color.Red else Color(0xFF4CAF50) // Red for selected
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = label, fontSize = 20.sp, color = Color.White)
+            Text(text = subLabel, fontSize = 14.sp, color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun CustomTipBox(
+    customTipPercentage: String,
+    isSelected: Boolean,
+    onValueChange: (String) -> Unit,
+    onCustomTipSelected: (Double) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .size(120.dp)
+            .clickable {
+                // Optional: Ensure the custom tip is selected on click
+                val customTip = customTipPercentage.toDoubleOrNull() ?: 0.0
+                onCustomTipSelected(customTip)
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color.Red else Color(0xFF4CAF50) // Red for selected
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = customTipPercentage,
+                onValueChange = {
+                    onValueChange(it) // Update the input value dynamically
+                    val customTip = it.toDoubleOrNull() ?: 0.0
+                    onCustomTipSelected(customTip) // Dynamically update selectedTipPercentage
+                },
+                label = { Text("Custom %") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+
+@Composable
+fun ResultsCard(tipAmount: Double, totalAmount: Double) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = "Tip Amount",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
+                ),
+                fontSize = 18.sp
+            )
+            Text(
+                text = "$${"%.2f".format(tipAmount)}",
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Total Bill Amount",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2196F3)
+                ),
+                fontSize = 18.sp
+            )
+            Text(
+                text = "$${"%.2f".format(totalAmount)}",
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+
+
+
+// Mortgage Calculator Activity
+@OptIn(ExperimentalMaterial3Api::class)
+class MortgageCalculatorActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            RSSReaderTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Mortgage Calculator") },
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) { // Back button
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    MortgageCalculatorScreen(modifier = Modifier.padding(innerPadding))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MortgageCalculatorScreen(modifier: Modifier = Modifier) {
+    var loanAmount by remember { mutableStateOf("") }
+    var downPayment by remember { mutableStateOf("") }
+    var interestRate by remember { mutableStateOf("") }
+    var loanTerm by remember { mutableStateOf("") }
+    var monthlyPayment by remember { mutableStateOf(0.0) }
+
+    // Error states
+    var loanAmountError by remember { mutableStateOf(false) }
+    var downPaymentError by remember { mutableStateOf(false) }
+    var interestRateError by remember { mutableStateOf(false) }
+    var loanTermError by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) { Text(
+            text = "Unlock Your Mortgage Potential",
+            color = Color(0xFF006400),
+            fontFamily = FontFamily.Cursive,
+            fontSize = 30.sp,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+            // Input: Loan Amount
+            OutlinedTextField(
+                value = loanAmount,
+                onValueChange = {
+                    loanAmount = it
+                    loanAmountError = !isValidPositiveNumber(it)
+                },
+                label = { Text("Enter Loan Amount") },
+                isError = loanAmountError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (loanAmountError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Input: Down Payment
+            OutlinedTextField(
+                value = downPayment,
+                onValueChange = {
+                    downPayment = it
+                    downPaymentError = !isValidPositiveNumber(it)
+                },
+                label = { Text("Enter Down Payment") },
+                isError = downPaymentError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (downPaymentError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Input: Interest Rate
+            OutlinedTextField(
+                value = interestRate,
+                onValueChange = {
+                    interestRate = it
+                    interestRateError = !isValidPositiveNumber(it)
+                },
+                label = { Text("Enter Annual Interest Rate (%)") },
+                isError = interestRateError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (interestRateError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Input: Loan Term
+            OutlinedTextField(
+                value = loanTerm,
+                onValueChange = {
+                    loanTerm = it
+                    loanTermError = !isValidPositiveNumber(it)
+                },
+                label = { Text("Enter Loan Term (Years)") },
+                isError = loanTermError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (loanTermError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Calculate Button
+            Button(
+                onClick = {
+                    if (!loanAmountError && !downPaymentError && !interestRateError && !loanTermError) {
+                        val principal = (loanAmount.toDoubleOrNull() ?: 0.0) - (downPayment.toDoubleOrNull() ?: 0.0)
+                        val annualRate = (interestRate.toDoubleOrNull() ?: 0.0) / 100
+                        val monthlyRate = annualRate / 12
+                        val months = (loanTerm.toDoubleOrNull() ?: 0.0) * 12
+                        monthlyPayment = if (monthlyRate > 0) {
+                            (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1)
+                        } else {
+                            principal / months
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .padding(top =20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50), // Green button
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Calculate", fontSize = 18.sp)
+            }
+
+            // Results Section
+            if (monthlyPayment > 0) {
+                ResultsCard(label = "Monthly Payment", value = monthlyPayment)
+            }
+        }
+
+        // App Logo at the Bottom
+        Image(
+            painter = painterResource(id = R.drawable.icon), // Replace with your logo resource
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 16.dp)
+        )
+    }
+}
+
+// Helper Function for Validation
+fun isValidPositiveNumber(input: String): Boolean {
+    return input.isEmpty() || input.toDoubleOrNull()?.let { it > 0 } == true
+}
+
+@Composable
+fun ResultsCard(label: String, value: Double) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
+                ),
+                fontSize = 18.sp
+            )
+            Text(
+                text = "$${"%.2f".format(value)}",
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+
+// Currency Converter Activity
+@OptIn(ExperimentalMaterial3Api::class)
+class CurrencyConverterActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            RSSReaderTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Currency Converter") },
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) {
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    CurrencyConverterScreen(modifier = Modifier.padding(innerPadding))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CurrencyConverterScreen(modifier: Modifier = Modifier) {
+    val currencies = listOf(
+        "US Dollar", "Euros", "Pesos", "Rupee", "Pounds Sterling",
+        "Yuan", "Saudi Riyal", "Russian Ruble", "Japanese Yen", "UAE Dirham"
+    )
+    val currencyCodes = mapOf(
+        "US Dollar" to "USD",
+        "Euros" to "EUR",
+        "Pesos" to "MXN",
+        "Rupee" to "INR",
+        "Pounds Sterling" to "GBP",
+        "Yuan" to "CNY",
+        "Saudi Riyal" to "SAR",
+        "Russian Ruble" to "RUB",
+        "Japanese Yen" to "JPY",
+        "UAE Dirham" to "AED"
+    )
+    val exchangeRates = mapOf(
+        Pair("USD", "EUR") to 0.95, Pair("EUR", "USD") to 1.05,
+        Pair("USD", "MXN") to 19.0, Pair("MXN", "USD") to 0.0526,
+        Pair("USD", "INR") to 82.0, Pair("INR", "USD") to 0.0122,
+        Pair("USD", "GBP") to 0.8, Pair("GBP", "USD") to 1.25,
+        Pair("USD", "CNY") to 7.2, Pair("CNY", "USD") to 0.14,
+        Pair("USD", "SAR") to 3.75, Pair("SAR", "USD") to 0.2667,
+        Pair("USD", "RUB") to 100.0, Pair("RUB", "USD") to 0.01,
+        Pair("USD", "JPY") to 130.0, Pair("JPY", "USD") to 0.0077,
+        Pair("USD", "AED") to 3.67, Pair("AED", "USD") to 0.2723,
+        Pair("EUR", "INR") to 82.0 / 0.95, Pair("INR", "EUR") to 0.95 / 82.0,
+        Pair("EUR", "GBP") to 0.8 / 0.95, Pair("GBP", "EUR") to 0.95 / 0.8,
+        Pair("EUR", "CNY") to 7.2 / 0.95, Pair("CNY", "EUR") to 0.95 / 7.2,
+        Pair("EUR", "SAR") to 3.75 / 0.95, Pair("SAR", "EUR") to 0.95 / 3.75,
+        Pair("EUR", "RUB") to 100.0 / 0.95, Pair("RUB", "EUR") to 0.95 / 100.0,
+        Pair("EUR", "JPY") to 130.0 / 0.95, Pair("JPY", "EUR") to 0.95 / 130.0,
+        Pair("EUR", "AED") to 3.67 / 0.95, Pair("AED", "EUR") to 0.95 / 3.67,
+
+        // MXN to others
+        Pair("MXN", "INR") to 82.0 / 19.0, Pair("INR", "MXN") to 19.0 / 82.0,
+        Pair("MXN", "GBP") to 0.8 / 19.0, Pair("GBP", "MXN") to 19.0 / 0.8,
+        Pair("MXN", "CNY") to 7.2 / 19.0, Pair("CNY", "MXN") to 19.0 / 7.2,
+        Pair("MXN", "SAR") to 3.75 / 19.0, Pair("SAR", "MXN") to 19.0 / 3.75,
+        Pair("MXN", "RUB") to 100.0 / 19.0, Pair("RUB", "MXN") to 19.0 / 100.0,
+        Pair("MXN", "JPY") to 130.0 / 19.0, Pair("JPY", "MXN") to 19.0 / 130.0,
+        Pair("MXN", "AED") to 3.67 / 19.0, Pair("AED", "MXN") to 19.0 / 3.67,
+
+        // INR to others
+        Pair("INR", "GBP") to 0.8 / 82.0, Pair("GBP", "INR") to 82.0 / 0.8,
+        Pair("INR", "CNY") to 7.2 / 82.0, Pair("CNY", "INR") to 82.0 / 7.2,
+        Pair("INR", "SAR") to 3.75 / 82.0, Pair("SAR", "INR") to 82.0 / 3.75,
+        Pair("INR", "RUB") to 100.0 / 82.0, Pair("RUB", "INR") to 82.0 / 100.0,
+        Pair("INR", "JPY") to 130.0 / 82.0, Pair("JPY", "INR") to 82.0 / 130.0,
+        Pair("INR", "AED") to 3.67 / 82.0, Pair("AED", "INR") to 82.0 / 3.67,
+
+        // GBP to others
+        Pair("GBP", "CNY") to 7.2 / 0.8, Pair("CNY", "GBP") to 0.8 / 7.2,
+        Pair("GBP", "SAR") to 3.75 / 0.8, Pair("SAR", "GBP") to 0.8 / 3.75,
+        Pair("GBP", "RUB") to 100.0 / 0.8, Pair("RUB", "GBP") to 0.8 / 100.0,
+        Pair("GBP", "JPY") to 130.0 / 0.8, Pair("JPY", "GBP") to 0.8 / 130.0,
+        Pair("GBP", "AED") to 3.67 / 0.8, Pair("AED", "GBP") to 0.8 / 3.67,
+
+        // CNY to others
+        Pair("CNY", "SAR") to 3.75 / 7.2, Pair("SAR", "CNY") to 7.2 / 3.75,
+        Pair("CNY", "RUB") to 100.0 / 7.2, Pair("RUB", "CNY") to 7.2 / 100.0,
+        Pair("CNY", "JPY") to 130.0 / 7.2, Pair("JPY", "CNY") to 7.2 / 130.0,
+        Pair("CNY", "AED") to 3.67 / 7.2, Pair("AED", "CNY") to 7.2 / 3.67,
+
+        // SAR to others
+        Pair("SAR", "RUB") to 100.0 / 3.75, Pair("RUB", "SAR") to 3.75 / 100.0,
+        Pair("SAR", "JPY") to 130.0 / 3.75, Pair("JPY", "SAR") to 3.75 / 130.0,
+        Pair("SAR", "AED") to 3.67 / 3.75, Pair("AED", "SAR") to 3.75 / 3.67,
+
+        // RUB to others
+        Pair("RUB", "JPY") to 130.0 / 100.0, Pair("JPY", "RUB") to 100.0 / 130.0,
+        Pair("RUB", "AED") to 3.67 / 100.0, Pair("AED", "RUB") to 100.0 / 3.67,
+
+        // JPY to AED
+        Pair("JPY", "AED") to 3.67 / 130.0, Pair("AED", "JPY") to 130.0 / 3.67
+    )
+
+    var amount by remember { mutableStateOf("") }
+    var fromCurrency by remember { mutableStateOf(currencies[0]) }
+    var toCurrency by remember { mutableStateOf(currencies[1]) }
+    var convertedAmount by remember { mutableStateOf<Double?>(null) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Creative Header
+            Text(
+                text = "Effortless Currency Exchange",
+                fontSize = 30.sp,
+                color = Color(0xFF006400),
+                fontFamily = FontFamily.Cursive,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // From Currency Dropdown
+            Text(text = "From Currency")
+            CurrencyDropdownMenu(selectedItem = fromCurrency, items = currencies) { selected ->
+                fromCurrency = selected
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // To Currency Dropdown
+            Text(text = "To Currency")
+            CurrencyDropdownMenu(selectedItem = toCurrency, items = currencies) { selected ->
+                toCurrency = selected
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Amount Input
+            OutlinedTextField(
+                value = amount,
+                onValueChange = {
+                    amount = it
+                    errorMessage = ""
+                },
+                label = { Text("Enter Amount") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Display error message if invalid input
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Convert Button
+            Button(
+                onClick = {
+                    val amountValue = amount.toDoubleOrNull()
+                    if (amountValue == null || amountValue <= 0) {
+                        errorMessage = "Please enter a valid positive number."
+                        convertedAmount = null
+                    } else {
+                        val fromCode = currencyCodes[fromCurrency]
+                        val toCode = currencyCodes[toCurrency]
+                        val rate = exchangeRates[Pair(fromCode, toCode)]
+                        if (rate != null) {
+                            convertedAmount = amountValue * rate
+                            errorMessage = ""
+                        } else {
+                            errorMessage = "Conversion rate not available."
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+            ) {
+                Text("Convert", fontSize = 18.sp)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Display Converted Amount
+            convertedAmount?.let {
+                ResultsCard(
+                    label = "Converted Amount",
+                    value = "%.2f".format(it),
+                    unit = currencyCodes[toCurrency] ?: ""
+                )
+            }
+        }
+
+        // App Logo
+        Image(
+            painter = painterResource(id = R.drawable.icon), // Replace with your logo
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(100.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+    }
+}
+
+@Composable
+fun ResultsCard(label: String, value: String, unit: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
+                ),
+                fontSize = 18.sp
+            )
+            Text(
+                text = "$value $unit",
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+@Composable
+fun CurrencyDropdownMenu(selectedItem: String, items: List<String>, onItemSelected: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = true }
+            .padding(vertical = 8.dp)
+    ) {
+        Text(text = selectedItem, modifier = Modifier.padding(8.dp))
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = item) },
+                    onClick = {
+                        onItemSelected(item)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+//investment calculator activity
+@OptIn(ExperimentalMaterial3Api::class)
+class InvestmentReturnCalculatorActivity : ComponentActivity() { // Renamed class
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            RSSReaderTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Investment Calculator") },
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) { // Back button
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    InvestmentScreen(modifier = Modifier.padding(innerPadding)) // Renamed function
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InvestmentScreen(modifier: Modifier = Modifier) { // Renamed function
+    var initialInvestment by remember { mutableStateOf("") }
+    var annualReturnRate by remember { mutableStateOf("") }
+    var investmentDuration by remember { mutableStateOf("") }
+    var futureValue by remember { mutableStateOf(0.0) }
+    var impressiveGrowthMessage by remember { mutableStateOf("") }
+
+    // Error states
+    var initialInvestmentError by remember { mutableStateOf(false) }
+    var annualReturnRateError by remember { mutableStateOf(false) }
+    var investmentDurationError by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Header
+            Text(
+                text = "Forecast Your Financial Growth",
+                color = Color(0xFF006400),
+                fontFamily = FontFamily.Cursive,
+                fontSize = 30.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Input: Initial Investment
+            OutlinedTextField(
+                value = initialInvestment,
+                onValueChange = {
+                    initialInvestment = it
+                    initialInvestmentError = !isaValidPositiveInput(it) // Renamed validation function
+                },
+                label = { Text("Enter Initial Investment") },
+                isError = initialInvestmentError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (initialInvestmentError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Input: Annual Return Rate
+            OutlinedTextField(
+                value = annualReturnRate,
+                onValueChange = {
+                    annualReturnRate = it
+                    annualReturnRateError = !isaValidPositiveInput(it) // Renamed validation function
+                },
+                label = { Text("Enter Annual Return Rate (%)") },
+                isError = annualReturnRateError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (annualReturnRateError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Input: Investment Duration
+            OutlinedTextField(
+                value = investmentDuration,
+                onValueChange = {
+                    investmentDuration = it
+                    investmentDurationError = !isaValidPositiveInput(it) // Renamed validation function
+                },
+                label = { Text("Enter Investment Duration (Years)") },
+                isError = investmentDurationError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (investmentDurationError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Calculate Button
+            Button(
+                onClick = {
+                    if (!initialInvestmentError && !annualReturnRateError && !investmentDurationError) {
+                        val principal = initialInvestment.toDoubleOrNull() ?: 0.0
+                        val rate = (annualReturnRate.toDoubleOrNull() ?: 0.0) / 100
+                        val time = investmentDuration.toDoubleOrNull() ?: 0.0
+                        futureValue = principal * Math.pow(1 + rate, time)
+
+                        // Display message if growth rate exceeds 10% of initial investment
+                        impressiveGrowthMessage = if (rate > 0.1) {
+                            "Impressive growth rate—you're making your money work hard!"
+                        } else {
+                            ""
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(top = 20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50), // Green button
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Calculate", fontSize = 18.sp)
+            }
+
+            // Impressive Growth Message
+            if (impressiveGrowthMessage.isNotEmpty()) {
+                Text(
+                    text = impressiveGrowthMessage,
+                    color = Color.Green,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            // Results Section
+            if (futureValue > 0) {
+                InvestmentResultsCard(label = "Future Value", value = futureValue) // Renamed function
+            }
+        }
+
+        // App Logo at the Bottom
+        Image(
+            painter = painterResource(id = R.drawable.icon), // Replace with your logo resource
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 16.dp)
+        )
+    }
+}
+
+// Helper Function for Validation
+fun isaValidPositiveInput(input: String): Boolean { // Renamed function
+    return input.isEmpty() || input.toDoubleOrNull()?.let { it > 0 } == true
+}
+
+@Composable
+fun InvestmentResultsCard(label: String, value: Double) { // Renamed function
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
+                ),
+                fontSize = 18.sp
+            )
+            Text(
+                text = "$${"%.2f".format(value)}",
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+//Discount Calculator Activity
+@OptIn(ExperimentalMaterial3Api::class)
+class DiscountCalculatorActivity : ComponentActivity() { // Renamed class
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            RSSReaderTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Discount Calculator") },
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) { // Back button
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    DiscountScreen(modifier = Modifier.padding(innerPadding)) // Renamed function
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DiscountScreen(modifier: Modifier = Modifier) { // Renamed function
+    var originalPrice by remember { mutableStateOf("") }
+    var discountPercentage by remember { mutableStateOf("") }
+    var discountAmount by remember { mutableStateOf(0.0) }
+    var finalPrice by remember { mutableStateOf(0.0) }
+    var bigSavingsMessage by remember { mutableStateOf("") }
+
+    // Error states
+    var originalPriceError by remember { mutableStateOf(false) }
+    var discountPercentageError by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Phrase Header
+            Text(
+                text = "Calculate Your Discounts Instantly",
+                color = Color(0xFF006400),
+                fontFamily = FontFamily.Cursive,
+                fontSize = 27.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Input: Original Price
+            OutlinedTextField(
+                value = originalPrice,
+                onValueChange = {
+                    originalPrice = it
+                    originalPriceError = !isValidPositiveInput(it) // Renamed validation function
+                },
+                label = { Text("Enter Original Price") },
+                isError = originalPriceError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (originalPriceError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Input: Discount Percentage
+            OutlinedTextField(
+                value = discountPercentage,
+                onValueChange = {
+                    discountPercentage = it
+                    discountPercentageError = !isValidPositiveInput(it) // Renamed validation function
+                },
+                label = { Text("Enter Discount Percentage") },
+                isError = discountPercentageError,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (discountPercentageError) {
+                Text(
+                    text = "Please enter a valid positive number",
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
+
+            // Calculate Button
+            Button(
+                onClick = {
+                    if (!originalPriceError && !discountPercentageError) {
+                        val price = originalPrice.toDoubleOrNull() ?: 0.0
+                        val discount = discountPercentage.toDoubleOrNull() ?: 0.0
+                        discountAmount = price * (discount / 100)
+                        finalPrice = price - discountAmount
+
+                        bigSavingsMessage = if (discount >= 50) {
+                            "Wow, you're saving big!"
+                        } else {
+                            ""
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50), // Green button
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Calculate", fontSize = 18.sp)
+            }
+
+            // Big Savings Message
+            if (bigSavingsMessage.isNotEmpty()) {
+                Text(
+                    text = bigSavingsMessage,
+                    color = Color.Green,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            // Results Section
+            if (discountAmount > 0 || finalPrice > 0) {
+                DiscountResultsCard(label = "Discount Amount", value = discountAmount) // Renamed function
+                DiscountResultsCard(label = "Final Price", value = finalPrice) // Renamed function
+            }
+        }
+
+        // App Logo at the Bottom
+        Image(
+            painter = painterResource(id = R.drawable.icon), // Replace with your logo resource
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 16.dp)
+        )
+    }
+}
+
+// Helper Function for Validation
+fun isValidPositiveInput(input: String): Boolean { // Renamed function
+    return input.isEmpty() || input.toDoubleOrNull()?.let { it > 0 } == true
+}
+
+@Composable
+fun DiscountResultsCard(label: String, value: Double) { // Renamed function
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
+                ),
+                fontSize = 18.sp
+            )
+            Text(
+                text = "$${"%.2f".format(value)}",
+                fontSize = 16.sp,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+class SavingsAdvisorActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            RSSReaderTheme {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Savings Advisor") },
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) { // Back button to exit activity
+                                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    SavingsAdvisorScreen(Modifier.padding(innerPadding))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SavingsAdvisorScreen(modifier: Modifier = Modifier) {
+    var monthlyIncome by remember { mutableStateOf("") }
+    var savingsGoal by remember { mutableStateOf("") }
+    val expenses = remember { mutableStateListOf<Pair<String, String>>() }
+
+    var expenseAmount by remember { mutableStateOf("") }
+    var expenseDescription by remember { mutableStateOf("") }
+    var showResults by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    if (showResults) {
+        ResultsScreen(
+            monthlyIncome = monthlyIncome.toDoubleOrNull() ?: 0.0,
+            savingsGoal = savingsGoal.toDoubleOrNull() ?: 0.0,
+            expenses = expenses,
+            onBack = { showResults = false } // Returns to the Savings Advisor screen
+        )
+    } else {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Track Your Money",
+                    fontFamily = FontFamily.Cursive,
+                    fontSize = 30.sp,
+                    color = Color(0xFF006400)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Input: Monthly Income
+                OutlinedTextField(
+                    value = monthlyIncome,
+                    onValueChange = {
+                        if (it.isEmpty() || it.all { char -> char.isDigit() || char == '.' }) {
+                            monthlyIncome = it
+                            errorMessage = ""
+                        } else {
+                            errorMessage = "Please enter valid numeric inputs."
+                        }
+                    },
+                    label = { Text("Enter Monthly Income") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Input: Savings Goal
+                OutlinedTextField(
+                    value = savingsGoal,
+                    onValueChange = {
+                        if (it.isEmpty() || it.all { char -> char.isDigit() || char == '.' }) {
+                            savingsGoal = it
+                            errorMessage = ""
+                        } else {
+                            errorMessage = "Please enter valid numeric inputs."
+                        }
+                    },
+                    label = { Text("Enter Monthly Savings Goal") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Funny message if savings goal > income
+                if (savingsGoal.toDoubleOrNull() != null &&
+                    monthlyIncome.toDoubleOrNull() != null &&
+                    savingsGoal.toDoubleOrNull()!! > monthlyIncome.toDoubleOrNull()!!
+                ) {
+                    Text(
+                        text = "Are you trying to save more than you earn? 🤔 Fix it!",
+                        fontSize = 16.sp,
+                        color = Color.Red,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                // Add Expense Section
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    OutlinedTextField(
+                        value = expenseAmount,
+                        onValueChange = {
+                            if (it.isEmpty() || it.all { char -> char.isDigit() || char == '.' }) {
+                                expenseAmount = it
+                                errorMessage = ""
+                            } else {
+                                errorMessage = "Please enter valid numeric inputs."
+                            }
+                        },
+                        label = { Text("Expense Amount") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    )
+                    OutlinedTextField(
+                        value = expenseDescription,
+                        onValueChange = { expenseDescription = it },
+                        label = { Text("Description") },
+                        modifier = Modifier.weight(2f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = Color.Red,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        val amount = expenseAmount.toDoubleOrNull()
+                        if (amount != null && amount > 0 && expenseDescription.isNotEmpty()) {
+                            expenses.add(expenseAmount to expenseDescription)
+                            expenseAmount = ""
+                            expenseDescription = ""
+                        } else {
+                            errorMessage = "Please enter valid numeric inputs and a description."
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.End),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)) // Green color
+                ) {
+                    Text("Add Expense")
+                }
+
+                // List of Expenses with Delete Button
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(expenses) { expense ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = expense.second, fontSize = 16.sp)
+                            Text(text = "$${expense.first}", fontSize = 16.sp, color = Color.Red)
+                            Button(
+                                onClick = { expenses.remove(expense) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            ) {
+                                Text("Delete")
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Calculate Button
+                Button(
+                    onClick = { showResults = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)) // Green color
+                ) {
+                    Text("Calculate", fontSize = 18.sp)
+                }
+            }
+
+            // App Logo
+            Image(
+                painter = painterResource(id = R.drawable.icon), // Replace with your logo resource
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ResultsScreen(
+    monthlyIncome: Double,
+    savingsGoal: Double,
+    expenses: List<Pair<String, String>>,
+    onBack: () -> Unit
+) {
+    val totalExpenses = expenses.sumOf { it.first.toDoubleOrNull() ?: 0.0 }
+    val remainingIncome = monthlyIncome - totalExpenses
+    val overspending = if (totalExpenses > monthlyIncome) totalExpenses - monthlyIncome else 0.0
+    val overAchievement = if (remainingIncome > savingsGoal) remainingIncome - savingsGoal else 0.0
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Results") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Expenses Breakdown",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF006400)
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(expenses) { expense ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = expense.second, fontSize = 16.sp)
+                        Text(text = "$${expense.first}", fontSize = 16.sp, color = Color.Red)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Total Expenses: $${"%.2f".format(totalExpenses)}", fontSize = 18.sp, color = Color.Black)
+            Text(text = "Total Income: $${"%.2f".format(monthlyIncome)}", fontSize = 18.sp, color = Color.Black)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Warning if Spending > Income
+            if (totalExpenses > monthlyIncome) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Warning: Your spending exceeds your income!",
+                        fontSize = 18.sp,
+                        color = Color.Red
+                    )
+                    Text(
+                        text = "Overspending Amount: $${"%.2f".format(overspending)}",
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                }
+            } else {
+                // Savings Message
+                when {
+                    remainingIncome >= savingsGoal -> {
+                        Text(
+                            text = "Well Done! You achieved your savings goal!",
+                            fontSize = 18.sp,
+                            color = Color.Green
+                        )
+                        Text(
+                            text = "You exceeded your goal by $${"%.2f".format(overAchievement)}!",
+                            fontSize = 16.sp,
+                            color = Color.Green
+                        )
+                    }
+                    remainingIncome == savingsGoal -> Text(
+                        text = "Broke Even! You met your goal exactly.",
+                        fontSize = 18.sp,
+                        color = Color.Blue
+                    )
+                    else -> Text(
+                        text = "Underachieved! Try saving more next time.",
+                        fontSize = 18.sp,
+                        color = Color.Red
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // App Logo
+            Image(
+                painter = painterResource(id = R.drawable.icon), // Replace with your logo resource
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
