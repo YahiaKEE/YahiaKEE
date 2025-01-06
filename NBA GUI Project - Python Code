@@ -1,0 +1,100 @@
+import sqlite3
+from tkinter import Tk, Label, Entry, Button, Text, Scrollbar, Frame, END, messagebox, VERTICAL, RIGHT, Y
+
+# Function to search for player stats
+def search_player():
+    player_name = entry_name.get()
+    if not player_name.strip():
+        messagebox.showerror("Input Error", "Please enter a player's name!")
+        return
+
+    # Connect to SQLite database
+    try:
+        conn = sqlite3.connect("C:/Users/yelsa/NBADataset.db")  # Connecting Database Path
+        cursor = conn.cursor()
+
+        # Query to fetch player stats
+        query = """
+        SELECT pd.PlayerName, pd.PlayerPosition, ps.PPG, ps.RPG, ps.APG, 
+               pp.TwoP_Percentage, pp.ThreeP_Percentage, pp.FreeThrow_Percentage
+        FROM PlayerDesc pd
+        LEFT JOIN PlayerStats ps ON pd.PlayerName = ps.PlayerName
+        LEFT JOIN PlayerPercentages pp ON pd.PlayerName = pp.PlayerName
+        WHERE pd.PlayerName LIKE ?
+        """
+        cursor.execute(query, (f"%{player_name}%",))
+        results = cursor.fetchall()
+
+        # Clear the text widget and display results
+        text_output.delete(1.0, END)
+        if results:
+            # Display headers
+            text_output.insert(
+                END,
+                f"{'Name':<20}{'Position':<10}{'PPG':<8}{'RPG':<8}{'APG':<8}{'2P%':<8}{'3P%':<8}{'FT%':<8}\n"
+            )
+            text_output.insert(END, "-" * 75 + "\n")
+
+            # Display each player's stats in a formatted way
+            for row in results:
+                text_output.insert(
+                    END,
+                    f"{row[0]:<20}{row[1]:<10}{row[2]:<8}{row[3]:<8}{row[4]:<8}{row[5]:<8}{row[6]:<8}{row[7]:<8}\n"
+                )
+            text_output.insert(END, "\n" + "-" * 75 + "\n")
+        else:
+            text_output.insert(END, "No player found with that name.\n")
+        conn.close()
+    except sqlite3.Error as e:
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+
+# Setting up the GUI
+root = Tk()
+root.title("NBA Player Stats Search")
+root.geometry("750x500")
+root.configure(bg="#f0f0f0")  # Set background color
+
+# Header
+Label(root, text="NBA Player Stats Search", font=("Times New Roman", 18, "bold"), bg="#f0f0f0").pack(pady=20)
+
+# Input frame
+input_frame = Frame(root, bg="#f0f0f0")
+input_frame.pack(pady=10)
+
+Label(input_frame, text="Enter Player Name:", font=("Times New Roman", 12), bg="#f0f0f0").pack(side="left", padx=5)
+entry_name = Entry(input_frame, width=30, font=("Times New Roman", 12))
+entry_name.pack(side="left", padx=5)
+
+Button(
+    input_frame,
+    text="Search",
+    command=search_player,
+    bg="#007BFF",
+    fg="white",
+    font=("Times New Roman", 12, "bold"),
+    padx=10,
+).pack(side="left", padx=5)
+
+# Output frame
+output_frame = Frame(root)
+output_frame.pack(pady=20, fill="both", expand=True)
+
+# Scrollbar for the text box
+scrollbar = Scrollbar(output_frame, orient=VERTICAL)
+scrollbar.pack(side=RIGHT, fill=Y)
+
+text_output = Text(
+    output_frame,
+    height=15,
+    width=90,
+    font=("Courier", 10),
+    yscrollcommand=scrollbar.set,
+    wrap="none",
+    bg="#f9f9f9",
+    relief="solid",
+)
+text_output.pack(side="left", fill="both", expand=True)
+scrollbar.config(command=text_output.yview)
+
+# Run the application
+root.mainloop()
