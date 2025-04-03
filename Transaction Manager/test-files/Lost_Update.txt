@@ -1,0 +1,8 @@
+LogFile ../test-files/Lost_Update.txt
+BeginTx 1 W
+Write   1 1
+BeginTx 2 W
+Write   2 1
+Commit 2
+Abort  1
+End All

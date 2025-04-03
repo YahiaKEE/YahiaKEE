@@ -1,0 +1,8 @@
+LogFile ../test-files/WW_Conflict.txt
+BeginTx 1 W
+Write   1 1
+BeginTx 2 W
+Write   2 1
+Commit 1
+Commit 2
+End All

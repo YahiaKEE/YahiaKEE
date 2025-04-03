@@ -1,0 +1,14 @@
+// Testing abort scenarios
+// ensuring transactions abort correctly on conflict
+LogFile ../test-files/AbortTest.log
+BeginTx 1 W
+Read    1 4
+Write   1 4
+BeginTx 2 W
+Read    2 4
+Write   2 5
+Abort   1
+Read    2 5
+Write   2 4
+Commit  2
+end all
