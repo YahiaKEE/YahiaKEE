@@ -1,21 +1,3 @@
-/*
- * @(#) bt.java   98/03/24
- * Copyright (c) 1998 UW.  All Rights Reserved.
- *         Author: Xiaohu Li (xioahu@cs.wisc.edu).
- *
- */
-
-/*
- *         CSE 4331/5331 B+ Tree Project (Spring 2025)
- *         Instructor: Abhishek Santra
- *
- */
-
-//Final
-//Dev Patel
-//Yahia Elsaad
-//Mohamad Nabih Alkhateeb
-
 
 package btree;
 
