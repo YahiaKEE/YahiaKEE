@@ -1,0 +1,51 @@
+ B+ Tree Implementation 
+
+This project is a partial implementation of a B+ Tree index structure as part of a database management system (MINIBASE), assigned in CSE 4331/5331: Database Systems.
+
+## 📝 Project Overview
+
+The B+ Tree is an essential structure used in DBMSs for indexing and efficient retrieval of records. In this project, we implemented:
+
+- **Insert operations** with support for **splitting** in case of page overflow.
+- A **naïve delete operation**, which removes entries without redistributing or merging.
+- Traversal of index and leaf pages using provided MINIBASE structures.
+- Handling **duplicate key entries** at the leaf level (stored as separate `<key, data ptr>` pairs).
+
+The leaf nodes form a **doubly linked list**, and all internal (index) nodes maintain `<key, pageNo>` pairs to aid navigation through the tree.
+
+## 📁 File Structure
+
+btree_project_spring_25/ ├── src/ │ ├── btree/ │ │ ├── BTreeFile.java # Core class: implement insert(), _insert(), NaiveDelete() │ │ └── ... # Other helper classes (provided) │ └── tests/ │ ├── BTTest.java # Test runner and interactive CLI │ └── test-insert-file.txt ├── Makefile # Compile + run setup └── README.md # You are here
+
+
+
+## ✅ Features Implemented
+
+- [x] `insert()` method: Creates root, inserts keys, handles overflows and splits.
+- [x] `_insert()` helper: Recursively handles insertion and page splitting.
+- [x] `NaiveDelete()` method: Performs simple deletion without re-balancing.
+- [x] Uses key comparison and `KeyClass` objects to support typed keys (integers only).
+- [x] Pinning/unpinning, page linking, header updates using MINIBASE Buffer Manager.
+
+## 🔧 How to Compile & Run
+
+Tested and built on **Linux/Unix systems** and UTA's `omega.uta.edu` server.
+
+1. Navigate to the `src/btree/` folder and compile the B+ Tree code:
+   ```bash
+   make
+Then go to the src/tests/ folder and compile + run the tests:
+
+make
+make bttest
+Run the test menu and follow on-screen options to:
+
+Insert values
+
+Delete values (Naive)
+
+Print B+ tree structure
+
+Print individual pages
+
+Clean compiled files:
