@@ -1,0 +1,51 @@
+# Transaction Manager – CSE 4331/5331 Spring 2025
+
+This project implements a **Transaction Manager** that controls **concurrent access** to data using **Strict Two-Phase Locking (S2PL)** with **shared (read)** and **exclusive (write)** locks.
+
+## 📌 Project Summary
+
+- Language: **C / C++**
+- Core Features: 
+  - S2PL protocol (no lock escalation)
+  - Per-operation threading with mutexes and semaphores
+  - Transaction lifecycle: Begin, Read, Write, Commit, Abort
+  - Custom lock table using hash table
+- **No MINIBASE** used. This is a standalone simulation of concurrency control.
+
+## 📂 Project Structure
+
+
+## ✅ Features Implemented
+
+- [x] **Threaded execution**: Each operation in a transaction runs on its own thread.
+- [x] **Lock table**: Built using hash table to track object locks.
+- [x] **Mutex + Condition Variables**: Ensure sequential operation within each transaction.
+- [x] **Read (Shared) Locks**: Allow concurrent reads from multiple read-only transactions.
+- [x] **Write (Exclusive) Locks**: One writer, full isolation.
+- [x] **Abort Handling**: Frees all locks and awakens dependent transactions.
+- [x] **Commit Handling**: Releases locks and updates log.
+- [x] **Output Logging**: Includes Tx ID, operation, object ID, value, time, lock status, and Tx status.
+
+## 🔧 How to Compile & Run
+
+### 🔁 One-time setup (Omega or Linux/Cygwin)
+```bash
+cd src
+make clean
+make
+
+
+Run a test
+./zgt_test ../test_files/S2T.txt
+
+Sample Output
+TxId Txtype Operation ObId:Obvalue:optime LockType Status TxStatus
+
+T1   W     BeginTx
+T1         ReadTx   1:-4:86869  ReadLock  Granted   P
+T1         WriteTx  3:7:86869   WriteLock Granted   P
+T1         CommitTx 3:7, 1:-4,
+T2   R     BeginTx
+T2         ReadTx   3:3:10782  ReadLock  Granted   P
+T2         CommitTx 3:3,
+
