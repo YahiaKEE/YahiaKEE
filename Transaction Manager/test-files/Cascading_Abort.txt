@@ -1,0 +1,8 @@
+LogFile ../test-files/Cascading_Abort.txt
+BeginTx 1 W
+Write   1 1
+BeginTx 2 R
+Read    2 1
+Abort   1
+Abort   2
+End All
