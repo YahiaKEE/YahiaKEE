@@ -34,7 +34,7 @@ Tested and built on **Linux/Unix systems** and UTA's `omega.uta.edu` server.
 1. Navigate to the `src/btree/` folder and compile the B+ Tree code:
    ```bash
    make
-Then go to the src/tests/ folder and compile + run the tests:
+Then go to the src/tests/ folder and compile + run the following tests:
 
 make
 make bttest
